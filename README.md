@@ -7,6 +7,7 @@ This repository contains the infrastructure for the Hermes Agent, an AI agent de
 - `hermes/` - Contains the main Hermes agent code
 - `configs/` - Configuration files
 - `scripts/` - Utility scripts
+- `tests/` - Unit tests
 - `.env.example` - Example environment variables
 
 ## Components
@@ -24,13 +25,20 @@ A FastAPI-based agent that:
   - `OLLAMA_HOST`: Ollama server URL
   - `OLLAMA_MODEL`: Default Ollama model to use
   - `CLOUDFLARE_TOKEN`: Cloudflare API token for Tunnel
-  - `DATABASE_URL`: PostgreSQL connection string
+  - `POSTGRES_USER`: PostgreSQL username (default: hermes)
+  - `POSTGRES_PASSWORD`: PostgreSQL password (default: hermes_pass)
+  - `POSTGRES_DB`: PostgreSQL database name (default: hermes_db)
+  - `CLOUDFLARE_SUBDOMAIN`: Subdomain for Cloudflare Tunnel (default: hermes-agent)
 
 - `configs/models.yaml` - Model routing rules and preferences
 
 ### Scripts
 
 - `scripts/setup_tunnel.sh` - Automates Cloudflare Tunnel setup
+
+### Tests
+
+- `tests/test_hermes_agent.py` - Unit tests for the FastAPI endpoints
 
 ### Containerization
 
@@ -44,20 +52,21 @@ A FastAPI-based agent that:
 1. Copy `.env.example` to `.env` and fill in the values
 2. Install dependencies: `pip install -r requirements.txt`
 3. Start Ollama (ensure it's running on the host specified in `.env`)
-4. Start the agent: `uvicorn hermes.hermes_agent:app --reload`
+4. Run tests: `pytest tests/`
+5. Start the agent: `uvicorn hermes.hermes_agent:app --reload`
 
 ### Using Docker Compose
 
-1. Copy `.env.example` to `.env` and fill in `CLOUDFLARE_TOKEN`
+1. Copy `.env.example` to `.env` and fill in the values (especially `CLOUDFLARE_TOKEN`)
 2. Start all services: `docker-compose up -d`
 3. The Hermes agent will be available at `http://localhost:8000`
 
 ### Cloudflare Tunnel Setup
 
-The agent is designed to be reachable via Cloudflare Tunnel at `agent.<your-domain>.dev`.
+The agent is designed to be reachable via Cloudflare Tunnel at `agent.<your-subdomain>.dev`.
 
 1. Ensure you have a domain and Cloudflare account
-2. Set `CLOUDFLARE_TOKEN` in your `.env`
+2. Set `CLOUDFLARE_TOKEN` and optionally `CLOUDFLARE_SUBDOMAIN` in your `.env`
 3. Run the setup script: `bash scripts/setup_tunnel.sh`
 4. Follow the script's output to complete the DNS setup and start the tunnel
 
@@ -92,8 +101,11 @@ Chat with the Hermes agent.
 
 - `OLLAMA_HOST` (default: `http://localhost:11434`)
 - `OLLAMA_MODEL` (default: `qwen2.5:14b`)
+- `POSTGRES_USER` (default: `hermes`)
+- `POSTGRES_PASSWORD` (default: `hermes_pass`)
+- `POSTGRES_DB` (default: `hermes_db`)
 - `CLOUDFLARE_TOKEN` (required for tunnel setup)
-- `DATABASE_URL` (default: `postgresql://user:password@localhost:5432/hermes_db`)
+- `CLOUDFLARE_SUBDOMAIN` (optional, defaults to `hermes-agent`)
 
 ## Model Configuration
 
@@ -105,4 +117,5 @@ See `configs/models.yaml` for model routing rules. The system supports:
 
 - The agent requires Ollama to be running and accessible at the specified host.
 - For production use, ensure proper security measures are in place (firewall, secrets management, etc.).
-- The Cloudflare Tunnel setup script assumes a Linux or macOS environment with `wget` or `brew` available.
+- The Cloudflare Tunnel setup script provides guidance for installation without assuming root access.
+- Database credentials are configurable via environment variables for security.
