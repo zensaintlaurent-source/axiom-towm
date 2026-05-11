@@ -1,0 +1,27 @@
+# Model routing rules for Hermes Agent
+models:
+  - name: qwen2.5:14b
+    provider: ollama
+    context_length: 32768
+    use_cases:
+      - general_chat
+      - reasoning
+      - code_generation
+    priority: high
+  - name: qwen2.5:32b
+    provider: ollama
+    context_length: 32768
+    use_cases:
+      - complex_reasoning
+      - detailed_analysis
+      - long_context_tasks
+    priority: medium
+    # Requires more resources, so lower priority
+
+# Default model to use if none specified
+default_model: qwen2.5:14b
+
+# Fallback models in order of preference
+fallback_models:
+  - qwen2.5:14b
+  - qwen2.5:32b

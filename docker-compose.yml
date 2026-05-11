@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: hermes
+      POSTGRES_PASSWORD: hermes_pass
+      POSTGRES_DB: hermes_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  hermes:
+    build: .
+    container_name: hermes_agent
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - OLLAMA_MODEL=qwen2.5:14b
+      - DATABASE_URL=postgresql://hermes:hermes_pass@postgres:5432/hermes_db
+      - CLOUDFLARE_TOKEN=${CLOUDFLARE_TOKEN}
+    depends_on:
+      - ollama
+      - postgres
+    restart: unless-stopped
+
+volumes:
+  ollama_data:
+  postgres_data:
